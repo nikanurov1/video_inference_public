@@ -61,7 +61,7 @@ class Inference_classifer:
 
         if isinstance(items, str): # PathImages if string => items==Directory Path => where located images
             list_bathes = custom_bathloader.Batches_fromPathImages(items)
-        elif isinstance(items, list) and isinstance(items[0], np.ndarray): # from ListNumpy if List[np.array]
+        elif isinstance(items, list): #and isinstance(items[0], np.ndarray): # from ListNumpy if List[np.array]
             list_bathes = custom_bathloader.Batches_fromListNumpy(items)
         else:
             raise Exception("Unsupported type Items")

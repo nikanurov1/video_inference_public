@@ -15,7 +15,6 @@ class CameraService:
         self.config = OmegaConf.load(config_path)
         self.leaf_diseases = LeafsDiseases(self.config)
         # self.camera = cv2.VideoCapture(0)
-        # Пробуем разные индексы камеры
         for camera_index in [0, 1, 2]:
             self.camera = cv2.VideoCapture(camera_index)
             if self.camera.isOpened():
@@ -24,7 +23,6 @@ class CameraService:
         if not self.camera.isOpened():
             raise RuntimeError("Не удалось открыть камеру")
         
-        # Установка разрешения 4K
         self.camera.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'))
         self.camera.set(cv2.CAP_PROP_FRAME_WIDTH, 3840)
         self.camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 2160)
@@ -33,36 +31,42 @@ class CameraService:
         ret, frame = self.camera.read()
         if not ret:
             return None, None
-        print(frame)
         
-        # Создаем DSFrame и DSSequence
         ds_frame = DSFrame(frame)
         sequence = DSSequence([ds_frame])
-        
-        # Обработка изображения
         processed_sequence = self.leaf_diseases(sequence)
         processed_frame = processed_sequence[0]
-        
-        # Получаем изображение с отрисованными боксами
         plotted_image = processed_frame.get_plot()
         
-        # Группируем боксы по классам и сортируем по уверенности
         class_boxes: Dict[str, List] = {}
         
         if hasattr(processed_frame, 'boxes') and processed_frame.boxes is not None:
             for box in processed_frame.boxes:
-                if box.class_name not in class_boxes:
-                    class_boxes[box.class_name] = []
+                leaf_diseases_tag = next(
+                    (tag for tag in box.tags if tag.model_name == 'leaf_diseases'), 
+                    None
+                )
                 
-                box_info = {
-                    'bbox': box.bbox.tolist(),
-                    'confidence': float(box.confidence),
-                    'image': frame[int(box.bbox[1]):int(box.bbox[3]), 
-                                 int(box.bbox[0]):int(box.bbox[2])]
-                }
-                class_boxes[box.class_name].append(box_info)
+                if leaf_diseases_tag:
+                    class_name = str(leaf_diseases_tag.class_id)
+                    if class_name not in class_boxes:
+                        class_boxes[class_name] = []
+                    
+                    box_info = {
+                        'bbox': [
+                            int((box.x - box.w/2) * frame.shape[1]),  # x1
+                            int((box.y - box.h/2) * frame.shape[0]),  # y1
+                            int((box.x + box.w/2) * frame.shape[1]),  # x2
+                            int((box.y + box.h/2) * frame.shape[0])   # y2
+                        ],
+                        'confidence': float(leaf_diseases_tag.conf),
+                        'image': frame[
+                            int((box.y - box.h/2) * frame.shape[0]):int((box.y + box.h/2) * frame.shape[0]),
+                            int((box.x - box.w/2) * frame.shape[1]):int((box.x + box.w/2) * frame.shape[1])
+                        ]
+                    }
+                    class_boxes[class_name].append(box_info)
             
-            # Сортируем и берем топ-10 для каждого класса
             for class_name in class_boxes:
                 class_boxes[class_name].sort(key=lambda x: x['confidence'], reverse=True)
                 class_boxes[class_name] = class_boxes[class_name][:10]
@@ -80,7 +84,6 @@ async def capture_image():
             content={"error": "Failed to capture image"}
         )
     
-    # Конвертируем основное изображение в bytes
     is_success, buffer = cv2.imencode(".jpg", image)
     if not is_success:
         return JSONResponse(
@@ -88,13 +91,11 @@ async def capture_image():
             content={"error": "Failed to encode image"}
         )
     
-    # Подготавливаем ответ
     response_data = {
         "main_image": buffer.tobytes().hex(),
         "classes": {}
     }
     
-    # Добавляем информацию о боксах каждого класса
     for class_name, boxes in class_boxes.items():
         class_data = {
             "boxes": [],
@@ -103,7 +104,6 @@ async def capture_image():
         }
         
         for box in boxes:
-            # Конвертируем вырезанное изображение бокса
             is_success, box_buffer = cv2.imencode(".jpg", box['image'])
             if is_success:
                 class_data["boxes"].append(box['bbox'])

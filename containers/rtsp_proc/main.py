@@ -13,11 +13,15 @@ class RTSPProcessor:
         self.rtsp_url = rtsp_url
         
     def process_stream(self):
-        cap = cv2.VideoCapture(self.rtsp_url)
+        cap = cv2.VideoCapture(1)
         
         # Создаем RTSP сервер для выходного потока
+        gstreamer_out = (
+            'appsrc ! videoconvert ! x264enc tune=zerolatency bitrate=2000 ! '
+            'rtph264pay ! udpsink host=localhost port=8000'
+        )
         output_stream = cv2.VideoWriter(
-            'appsrc ! videoconvert ! x264enc tune=zerolatency ! rtph264pay ! udpsink host=127.0.0.1 port=5000',
+            gstreamer_out,
             cv2.CAP_GSTREAMER,
             0, 30, (1280, 720)
         )
@@ -38,7 +42,7 @@ class RTSPProcessor:
                 processed = self.leaf_diseases(sequence)
                 
                 # Получаем кадр с отрисованными боксами
-                plotted_img = processed.get_plot()
+                plotted_img = processed[0].get_plot()
                 
                 # Отправляем в выходной поток
                 output_stream.write(plotted_img)
