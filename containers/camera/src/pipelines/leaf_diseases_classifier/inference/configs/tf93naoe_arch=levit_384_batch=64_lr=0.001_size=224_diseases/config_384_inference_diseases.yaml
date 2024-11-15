@@ -1,0 +1,18 @@
+### DATA PARAMETRS
+checkpoint: /Users/YaVolkonskiy/Documents/001_Projects/003_tomato/002_train_models/010_diseases/leaf_diseases_inference/leaf_diseases_classifier/inference/configs/tf93naoe_arch=levit_384_batch=64_lr=0.001_size=224_diseases/leaf_diseases_classifier_best.pth
+
+## Params model architecture
+backend_model: timm
+architecture_model : facebook/levit-384
+
+# classes classifer
+classes: [ '1', '2', '3', '4', '5']
+
+# params for dataset
+use_albu: True
+use_norm: False
+size: 224 # image size
+batch: 8
+
+
+

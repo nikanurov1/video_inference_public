@@ -1,0 +1,18 @@
+### DATA PARAMETRS
+checkpoint: /Users/YaVolkonskiy/Documents/001_Projects/003_tomato/002_train_models/007_Leaf_quality/leaf_quality_inference/leaf_quality_classifier/inference/configs/u23uazhw_arch=levit_384.fb_dist_in1k_size=224_leaf_qulity/best_leaf_qulity.pth
+
+## Params model architecture
+backend_model: timm
+architecture_model: levit_384.fb_dist_in1k
+
+# classes classifer
+classes: [ '1', '2', '3', '4', '5']
+
+# params for dataset
+use_albu: True
+use_norm: False
+size: 224 # image size
+batch: 8
+
+
+

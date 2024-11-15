@@ -1,0 +1,1 @@
+from leaf_diseases_classifier.inference import Inference_classifer

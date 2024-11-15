@@ -1,0 +1,19 @@
+device: cuda:0
+
+batch_size: 4
+
+pipelines_order:  
+  - leaf_detector
+
+
+leaf_detector:
+  __self__: src.pipelines.leaf_detector.leaf_detector.YoloDetector
+  sys_path: False
+  task: segmentation
+  weights_path: ./weights/leaf_detector.pt
+  imgsz: 1440
+  half: True
+  classes:
+    leaf: 0
+  threshold: 0.4
+  iou: 0.5

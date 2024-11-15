@@ -1,0 +1,35 @@
+### DATA PARAMETRS
+dataset_type: folders # Описание в документации [folders, yaml] Тип датасета folders, еще бывают yaml
+path_data: /home/jovyan/anurov/001_tomato_leafs_project/003_diseases_classifier/002_train_data/exp_001/  # dataset root dir
+path_out: /home/jovyan/anurov/001_tomato_leafs_project/003_diseases_classifier/003_experiments/
+
+## Params model architecture
+backend_model: facebook #  microsoft #
+architecture_model: levit_384 #swin_base_patch4_window7_224 #
+
+# classes classifer
+classes: [ '1', '2', '3', '4', '5']
+
+# params for dataset
+use_albu: True
+use_norm: Falses
+size: 224 # image size
+
+
+device: null
+num_workers: 12
+save_best: 3
+
+
+
+### HYPER-PARAMETRS
+#hyperparameters:
+batch_size: 64
+lr: 0.001
+epochs: 300
+
+
+## Tracker Results Reporters
+tracker_columns: ['epoch', 'train_loss', 'train_acc', 'valid_loss', 'valid_acc','name_checkpoint', 'lr']
+
+

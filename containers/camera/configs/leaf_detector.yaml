@@ -1,0 +1,58 @@
+device: cuda:0
+
+batch_size: 4
+
+pipelines_order:  
+  - leaf_detector
+  - leaf_quality_classifier
+  - leaf_diseases_classifier
+
+leaf_detector:
+  __self__: src.pipelines.leaf_detector.leaf_detector.YoloDetector
+  sys_path: False
+  task: segmentation
+  weights_path: ./weights/leaf_detector.pt
+  imgsz: 1440
+  half: True
+  classes:
+    leaf: 0
+  threshold: 0.4
+  iou: 0.5
+
+leaf_quality_classifier:
+  __self__: src.pipelines.leaf_quality_classifier.Inference_classifer
+  # __self__: src.pipelines.leaf_quality_classifier.inference.inference.Inference_classifer
+  task: classification
+  backend_model: timm
+  architecture_model: levit_384.fb_dist_in1k
+  checkpoint: weights/best_leaf_qulity.pth
+  classes:
+    0: 'very_bad'
+    1: 'bad'
+    2: 'medium good'
+    3: 'good quality'
+    4: 'excellent'
+# params for dataset
+  use_albu: True
+  use_norm: False
+  size: 224 # image size
+  batch: 8
+
+leaf_diseases_classifier:
+  __self__: src.pipelines.leaf_diseases_classifier.Inference_classifer
+  weights_path: somewhere
+  task: classification
+  backend_model: timm
+  architecture_model : facebook/levit-384
+  checkpoint: weights/leaf_diseases_classifier_best.pth
+  classes:
+   0: 'healthy'
+   1: 'mechanical damage'
+   2: 'low rank of disease'
+   3: 'medium rank of disease'
+   4: 'high rank of disease'
+  # params for dataset
+  use_albu: True
+  use_norm: False
+  size: 224 # image size
+  batch: 8
