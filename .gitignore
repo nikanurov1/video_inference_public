@@ -86,7 +86,7 @@ $RECYCLE.BIN/
 *.tar
 
 # Pytorch Weights
-*.pth
-*.pt
+# *.pth
+# *.pt
 
-/weights
+# /weights
